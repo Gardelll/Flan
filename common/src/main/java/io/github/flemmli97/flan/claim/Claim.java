@@ -18,6 +18,7 @@ import io.github.flemmli97.flan.player.LogoutTracker;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import io.github.flemmli97.flan.player.display.ClaimDisplayBox;
 import io.github.flemmli97.flan.player.display.DisplayBox;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -72,7 +73,7 @@ public class Claim implements IPermissionContainer {
     private final Map<ResourceLocation, Boolean> globalPerm = new HashMap<>();
     private final Map<String, Map<ResourceLocation, Boolean>> permissions = new HashMap<>();
 
-    private final Map<UUID, String> playersGroups = new HashMap<>();
+    private final Map<UUID, String> playersGroups = new ConcurrentHashMap<>();
 
     private final Set<UUID> fakePlayers = new HashSet<>();
 

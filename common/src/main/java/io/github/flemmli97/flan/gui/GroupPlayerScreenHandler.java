@@ -3,6 +3,7 @@ package io.github.flemmli97.flan.gui;
 import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimUtils;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -99,15 +100,19 @@ public class GroupPlayerScreenHandler extends PagedServerOnlyScreenHandler<Claim
         if (index == 3) {
             player.closeContainer();
             player.getServer().execute(() -> StringResultScreenHandler.createNewStringResult(player, (s) -> {
-                boolean fl = player.getServer().getProfileCache().get(s).map(prof -> this.data.getClaim().setPlayerGroup(prof.getId(), this.data.getGroup(), false)).orElse(true);
-                player.closeContainer();
-                player.getServer().execute(() -> GroupPlayerScreenHandler.openPlayerGroupMenu(player, this.data.getClaim(), this.data.getGroup()));
-                if (fl)
-                    ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);
-                else {
-                    player.displayClientMessage(ClaimUtils.translatedText("flan.playerGroupAddFail", ChatFormatting.RED), false);
-                    ServerScreenHelper.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
-                }
+                CompletableFuture.runAsync(() -> {
+                    boolean fl = player.getServer().getProfileCache().get(s).map(prof -> this.data.getClaim().setPlayerGroup(prof.getId(), this.data.getGroup(), false)).orElse(true);
+                    player.getServer().execute(() -> {
+                        player.closeContainer();
+                        player.getServer().execute(() -> GroupPlayerScreenHandler.openPlayerGroupMenu(player, this.data.getClaim(), this.data.getGroup()));
+                        if (fl)
+                            ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);
+                        else {
+                            player.displayClientMessage(ClaimUtils.translatedText("flan.playerGroupAddFail", ChatFormatting.RED), false);
+                            ServerScreenHelper.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                        }
+                    });
+                });
             }, () -> {
                 player.closeContainer();
                 player.getServer().execute(() -> GroupPlayerScreenHandler.openPlayerGroupMenu(player, this.data.getClaim(), this.data.getGroup()));
